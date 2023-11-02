@@ -4,12 +4,15 @@ const CommentSchema = new mongoose.Schema({
     post_no:{
         type   : Number,
         require: true,
-        unique : true
     },
     cmt_no:{
         type   : Number,
         require: true,
         unique : true
+    },
+    title:{
+        type   : String,
+        require: true
     },
     contents:{
         type   : String,

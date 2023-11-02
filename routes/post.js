@@ -68,9 +68,9 @@ router.put("/post/:post_no", async(req, res) => {
         });
     }
 
+    // 수정 실패 예외처리
     await Post.updateOne({post_no}, {$set: {'title': title, 'contents': contents}});
 
-    // 성공여부 예외처리
     res.json({success: true});
 });
 
@@ -87,6 +87,7 @@ router.delete("/post/:post_no", async(req, res) => {
         });
     }
 
+    // 삭제 실패 예외처리
     await Post.deleteOne({post_no});
 
     // 성공여부 예외처리
