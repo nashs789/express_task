@@ -9,8 +9,8 @@ app.use(express.json());
 const goodsRouter = require("./routes/goods")
 app.use("/api", [goodsRouter]);
 
-const cartsRouter = require("./routes/carts");
-app.use("/api", [goodsRouter, cartsRouter]);
+const postRouter = require("./routes/post");
+app.use("/api", [postRouter]);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');

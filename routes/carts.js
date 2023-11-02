@@ -3,21 +3,25 @@ const router = express.Router();
 
 const Cart = require("../schemas/carts.js");
 const Goods = require("../schemas/goods.js");
-const { route } = require("./goods.js");
 
+// 장바구니 조회 API
 router.get("/carts", async (req, res) => {
-    const carts = await Cart.find({});
-    const goodIds = carts.map((cart) => cart.goodsId);
-    const goods = await Goods.find({goodsId: goodIds});
+  const carts = await Cart.find({});
+  const goodsIds = carts.map((cart) => cart.goodsId);
 
-    const results = carts.map((cart) => {
-        return {
-            quantity: cart.quantity,
-            goods   : goods.find((item) => item.goodsId === cart.goodsId)
-        };
-    });
+  const goods = await Goods.find({ goodsId: goodsIds });
 
-    res.json({carts: results});
+  const results = carts.map((cart) => {
+    return {
+      quantity: cart.quantity,
+      goods: goods.find((item) => item.goodsId === cart.goodsId)
+    };
+  });
+
+  res.json({
+    carts: results,
+  });
 });
+
 
 module.exports = router;

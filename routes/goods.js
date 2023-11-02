@@ -2,9 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 // =============== Schemas ===============
-const Goods = require("../schemas/goods");
-const Cart = require("../schemas/carts");
-const carts = require('../schemas/carts');
+const Cart = require("../schemas/carts.js");
+const Goods = require("../schemas/goods.js");
 
 const goods = [
     {
@@ -53,6 +52,20 @@ router.get("/goods", (req, res) => {
 	res.json({ goods: goods });
 });
 
+router.get("/goods/cart", async (req, res) => {
+  const carts = await Cart.find();
+  const goodsIds = carts.map((cart) => cart.goodsId);
+
+  const goods = await Goods.find({ goodsId: goodsIds });
+
+  res.json({
+      carts: carts.map((cart) => ({
+          quantity: cart.quantity,
+          goods: goods.find((item) => item.goodsId === cart.goodsId),
+      })),
+  });
+});
+
 router.get("/goods/:goodsId", (req, res) => {
 	const { goodsId } = req.params;
 	const [detail] = goods.filter((goods) => goods.goodsId === Number(goodsId));
@@ -64,7 +77,7 @@ router.post("/goods", async (req, res) => {
 
     const goods = await Goods.find({ goodsId });
     if (goods.length) {
-    return res.status(400).json({ success: false, errorMessage: "이미 있는 데이터입니다." });
+        return res.status(400).json({ success: false, errorMessage: "이미 있는 데이터입니다." });
     }
 
     const createdGoods = await Goods.create({ goodsId, name, thumbnailUrl, category, price });
@@ -75,6 +88,12 @@ router.post("/goods", async (req, res) => {
 router.post("/goods/:goodsId/cart", async(req, res) => {
     const {goodsId} = req.params;
     const {quantity} = req.body;
+
+    if(quantity < 1){
+        res.status(400).json({errorMessage: "수량은 1 이상이어야 합니다."});
+        return;
+    }
+
     const existsCarts = await Cart.find({goodsId: Number(goodsId)});
 
     if(existsCarts.length){
