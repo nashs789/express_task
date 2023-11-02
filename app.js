@@ -12,6 +12,9 @@ app.use("/api", [goodsRouter]);
 const postRouter = require("./routes/post");
 app.use("/api", [postRouter]);
 
+const CommentRouter = require("./routes/comment");
+app.use("/api", [CommentRouter]);
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });

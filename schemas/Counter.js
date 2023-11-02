@@ -8,6 +8,10 @@ let counterSchema = mongoose.Schema({
     postIdCounter:{
         type   : Number,
         default: 0
+    },
+    CmtIdCounter:{
+        type   : Number,
+        default: 0
     }
 });
 

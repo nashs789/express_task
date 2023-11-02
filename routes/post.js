@@ -3,13 +3,11 @@ const router = express.Router();
 
 const Post = require("../schemas/post.js");
 const Counter = require("../schemas/Counter.js")
-//const Comment = require("../schemas/comment.js");
-const { CustomError, NoData, InvalidUser } = require("../routes/Class/CustomError.js");
-const { route } = require('./goods.js');
+const { NoData, InvalidUser } = require("../routes/Class/CustomError.js");
 
 // 예외처리 미숙하게 되서 다시 한 번 잡아서 해야할듯 (일단 게시판 과제 먼저 끝내고)
 
-router.get("/post", async (req, res) => {
+router.get("/post", async(req, res) => {
     const posts = await Post.find().sort({reg_date: -1});
 
     if(posts.length == 0){
@@ -20,7 +18,7 @@ router.get("/post", async (req, res) => {
         });
     }
 
-    res.json({posts: posts});
+    res.json({success:true, posts: posts});
 });
 
 router.post("/post", async(req, res) => {
