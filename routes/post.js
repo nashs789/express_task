@@ -4,7 +4,7 @@ const router = express.Router();
 const Post = require("../schemas/post.js");
 const Counter = require("../schemas/Counter.js")
 //const Comment = require("../schemas/comment.js");
-const { CustomError, NoData } = require("../routes/Class/CustomError.js");
+const { CustomError, NoData, InvalidUser } = require("../routes/Class/CustomError.js");
 
 router.get("/post", async (req, res) => {
     const posts = await Post.find().sort({reg_date: -1});
@@ -31,6 +31,8 @@ router.post("/post", async(req, res) => {
     await Counter.updateOne({id: 0}, {$set: {"postIdCounter": post_no}});
     const newPost = await Post.create({post_no, title, contents, user, password});
 
+    // 등록 실패 예외처리
+
     res.json({newPost});
 });
 
@@ -49,6 +51,25 @@ router.get("/post/:post_no", async(req, res) =>{
     }
 
     res.json({post: result});
+});
+
+router.put("/post/:post_no", async(req, res) => {
+    const {post_no} = req.params;
+    const {user, password, title, contents} = req.body;
+    const post_info = await Post.findOne({"post_no": Number(post_no)});
+
+    if(post_info.user != user || post_info.password != password){
+        res.status(400).json({
+            success: false,
+            error  : InvalidUser.message,
+            code   : InvalidUser.code
+        })
+    }
+
+    await Post.updateOne({post_no}, {$set: {'title': title, 'contents': contents}});
+
+    // 성공여부 예외처리
+    res.json({success: true});
 });
 
 module.exports = router;
