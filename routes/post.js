@@ -5,6 +5,9 @@ const Post = require("../schemas/post.js");
 const Counter = require("../schemas/Counter.js")
 //const Comment = require("../schemas/comment.js");
 const { CustomError, NoData, InvalidUser } = require("../routes/Class/CustomError.js");
+const { route } = require('./goods.js');
+
+// 예외처리 미숙하게 되서 다시 한 번 잡아서 해야할듯 (일단 게시판 과제 먼저 끝내고)
 
 router.get("/post", async (req, res) => {
     const posts = await Post.find().sort({reg_date: -1});
@@ -47,7 +50,7 @@ router.get("/post/:post_no", async(req, res) =>{
             success: false,
             error  : NoData.message,
             code   : NoData.code
-        })
+        });
     }
 
     res.json({post: result});
@@ -58,15 +61,35 @@ router.put("/post/:post_no", async(req, res) => {
     const {user, password, title, contents} = req.body;
     const post_info = await Post.findOne({"post_no": Number(post_no)});
 
+    // 유저 정보에 따른 예외처리도 공통으로 처리하면 좋을듯?
     if(post_info.user != user || post_info.password != password){
         res.status(400).json({
             success: false,
             error  : InvalidUser.message,
             code   : InvalidUser.code
-        })
+        });
     }
 
     await Post.updateOne({post_no}, {$set: {'title': title, 'contents': contents}});
+
+    // 성공여부 예외처리
+    res.json({success: true});
+});
+
+router.delete("/post/:post_no", async(req, res) => {
+    const {post_no} = req.params;
+    const {user, password} = req.body;
+    const post_info = await Post.findOne({"post_no": Number(post_no)});
+
+    if(post_info.user != user || post_info.password != password){
+        res.status(400).json({
+            success: false,
+            error  : InvalidUser.message,
+            code   : InvalidUser.code
+        });
+    }
+
+    await Post.deleteOne({post_no});
 
     // 성공여부 예외처리
     res.json({success: true});
