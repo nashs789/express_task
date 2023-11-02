@@ -63,4 +63,14 @@ router.put("/comment/:cmt_no", async(req, res) => {
     res.json({success: true})
 });
 
+// 삭제에는 조건 없음(owner, id, password)
+router.delete("/comment/:cmt_no", async(req, res) => {
+    const {cmt_no} = req.params;
+    const {post_no} = req.body;
+    
+    await Comment.deleteOne({cmt_no});
+
+    res.json({success:true});
+});
+
 module.exports = router;
