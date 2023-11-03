@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-let counterSchema = mongoose.Schema({
+const counterSchema = new mongoose.Schema({
     id: {
         type   : Number,
         default: 0
@@ -10,6 +10,10 @@ let counterSchema = mongoose.Schema({
         default: 0
     },
     CmtIdCounter:{
+        type   : Number,
+        default: 0
+    },
+    UserIdCounter:{
         type   : Number,
         default: 0
     }
