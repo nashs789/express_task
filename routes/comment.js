@@ -3,74 +3,105 @@ const router = express.Router();
 
 const Comment = require("../schemas/comment.js");
 const Counter = require("../schemas/Counter.js");
-const {NoData, InvalidUser} = require("../routes/Class/CustomError.js");
+const {NoData, NoComments, FailedUpdate, FailedDelete} = require("./Class/CustomError.js");
+const { Common } = require("../routes/Class/Common.js");
 
-router.get("/comment", async(req, res) => {
-    const comments = await Comment.find().sort({reg_date: -1});
+router.get("/comment", async(req, res, next) => {
+    let selectResult;
+
+    try{
+        selectResult = await Comment.find().sort({reg_date: -1});
     
-    if(comments.length == 0){
-        res.status(400).json({
-            success: false,
-            error  : NoData.message,
-            code   : NoData.code
-        });
-    }
-
-    res.json({success:true, comments: comments});
-});
-
-router.post("/comment/", async(req, res) => {
-    const {post_no, title, contents, user} = req.body;
-
-    // 수정과 등록 공통된 부분 함수로 뺴면 좋을듯
-    if(contents == ""){
-        res.json({
-            success: false,
-            msg    : "댓글 내용을 입력해주세요."
-        });
+        if(selectResult.length == 0){
+            throw NoData;
+        }
+    } catch(err){
+        next(err);
         return;
     }
 
-    const counter = await Counter.findOne({"id": 0});
-    let cmt_no = counter.CmtIdCounter + 1;
-
-    // insert 실패시 에러처리
-    await Counter.updateOne({id: 0}, {$set: {"CmtIdCounter": cmt_no}});
-    const newComment = Comment.create({post_no, cmt_no, title, contents, user});
-
-    // 이거 res에 comment에 아무것도 안담기는데?
     res.json({
-        success: true,
-        comment: newComment
+        "success": true,
+        "result" : selectResult
+    });
+});
+
+router.post("/comment", async(req, res, next) => {
+    const {post_no, contents, user} = req.body;
+    let insertResult;
+
+    try{
+        if(Common.isEmpty(contents)){
+            throw NoComments;
+        }
+
+        const counter = await Counter.findOne({"id": 0});
+        let cmt_no = counter.CmtIdCounter + 1;
+
+        await Counter.updateOne({id: 0}, {$set: {"CmtIdCounter": cmt_no}});
+        insertResult = await Comment.create({post_no, cmt_no, contents, user});
+        
+        if(!insertResult){
+            throw FailedUpdate;
+        }
+    } catch(err){
+        next(err);
+        return;
+    }
+
+    res.json({
+        "success": true,
+        "result" : insertResult
     })
 });
 
-router.put("/comment/:cmt_no", async(req, res) => {
+router.put("/comment/:cmt_no", async(req, res, next) => {
     const {cmt_no} = req.params;
-    const {post_no, title, contents} = req.body;
+    const {contents} = req.body;
+    let updateResult;
     
-    if(contents == ""){
-        res.json({
-            success: false,
-            msg    : "댓글 내용을 입력해주세요."
-        });
+    try {
+        if(Common.isEmpty(contents)){
+            throw NoComments;
+        }
+
+        updateResult = await Comment.updateOne({cmt_no}, {$set: {'contents': contents}});
+        
+        if(!updateResult){
+            throw FailedUpdate;
+        }
+    } catch(err){
+        next(err);
         return;
     }
 
-    // 수정 실패 예외처리
-    await Comment.updateOne({cmt_no}, {$set: {'title': title, 'contents': contents}});
-
-    res.json({success: true})
+    res.json({
+        "success": true,
+        "result" : updateResult
+    })
 });
 
 // 삭제에는 조건 없음(owner, id, password)
-router.delete("/comment/:cmt_no", async(req, res) => {
+router.delete("/comment/:cmt_no", async(req, res, next) => {
     const {cmt_no} = req.params;
     const {post_no} = req.body;
+    let deleteResult;
     
-    await Comment.deleteOne({cmt_no});
+    try{
+        deleteResult = await Comment.deleteOne({cmt_no});
 
-    res.json({success:true});
+        if(deleteResult.deletedCount == 0){
+            throw FailedDelete;
+        }
+    } catch(err){
+        next(err);
+        return;
+    }
+
+    res.json({
+        "success":true,
+        "result" :deleteResult
+    });
 });
 
 module.exports = router;

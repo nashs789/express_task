@@ -10,13 +10,9 @@ const CommentSchema = new mongoose.Schema({
         require: true,
         unique : true
     },
-    title:{
-        type   : String,
-        require: true
-    },
     contents:{
         type   : String,
-        require: true
+        require: true,
     },
     user: {
         type   : String,

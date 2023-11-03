@@ -5,20 +5,23 @@ const Post = require("../schemas/post.js");
 const Counter = require("../schemas/Counter.js")
 const { NoData, InvalidUser } = require("../routes/Class/CustomError.js");
 
-// 예외처리 미숙하게 되서 다시 한 번 잡아서 해야할듯 (일단 게시판 과제 먼저 끝내고)
+router.get("/post", async(req, res, next) => {
+    let selectResult;
+    try {
+        selectResult = await Post.find().sort({reg_date: -1});
 
-router.get("/post", async(req, res) => {
-    const posts = await Post.find().sort({reg_date: -1});
-
-    if(posts.length == 0){
-        res.status(400).json({
-            success: false,
-            error  : NoData.message,
-            code   : NoData.code
-        });
+        if(selectResult.length == 0){
+            throw NoData;
+        }
+    } catch(err){
+        next(err);
+        return;
     }
 
-    res.json({success:true, posts: posts});
+    res.json({
+        "success": true, 
+        "result" : selectResult
+    });
 });
 
 router.post("/post", async(req, res) => {
@@ -26,9 +29,8 @@ router.post("/post", async(req, res) => {
     const counter = await Counter.find({});
     let post_no = counter[0].postIdCounter + 1;
 
-    // counter랑 post등록은 transaction 안 묶여있음
+    // counter랑 post등록은 transaction 안 묶여있음 => 테스트 결과 밑에서 터지면 위만 반영됨
     // counter는 정수인가? 그럼 overflow는?
-    // 예외처리는? 예외처리 예시로 위에 post_no 증가 안시키고 하면됨 unique라 겹침
     await Counter.updateOne({id: 0}, {$set: {"postIdCounter": post_no}});
     const newPost = await Post.create({post_no, title, contents, user, password});
 

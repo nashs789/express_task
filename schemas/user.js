@@ -10,9 +10,13 @@ const userSchema = new mongoose.Schema({
         type   : String,
         require: true,
         validate: {
-            validator: (pw) => pw.length >= 4,
-            message: '비밀번호는 4글자 이상이여야 합니다.'
+            validator: (pw) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{4,}$/.test(pw),
+            message: '비밀번호는 대소문자, 숫자로 이루어진 4글자 이상이여야 합니다.'
         }
+    },
+    reg_date:{
+        type   : Date,
+        default: Date.now
     }
 });
 
