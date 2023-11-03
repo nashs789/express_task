@@ -15,15 +15,30 @@ const userRouter = require("./routes/user");
 
 // app.set('trust proxy', true);
 app.use(express.json());
+
+app.use((req, res, next) => {
+    const date = new Date();
+    const params = req.body;
+
+    console.log("=============== [", req.method, "]", req.url, "===============");
+    console.log("date: ", date)
+    Object.keys(params).forEach((key) => {
+        const value = params[key];
+        console.log(key, "=", value);
+    });
+    
+    next();
+});
+
 app.use("/api", [goodsRouter, postRouter, CommentRouter, userRouter]);
 
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+    res.send('Hello World!');
 });
 
 //  404 responses
 app.use(function(req, res, next) {
-  res.status(404).send('Sorry cant find that!');
+    res.status(404).send('Sorry cant find that!');
 });
 
 // error-handling middleware
@@ -56,5 +71,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(port, () => {
-  console.log(port, '포트로 서버가 열렸어요!');
+    console.log(port, '포트로 서버가 열렸어요!');
 });
