@@ -13,10 +13,6 @@ const postSchema = new mongoose.Schema({
     contents:{
         type   : String,
         require: true,
-        validate: {
-            validator: (pw) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{4,}$/.test(pw),
-            message: 'Transaction Test !!!'
-        }
     },
     user: {
         type   : String,
