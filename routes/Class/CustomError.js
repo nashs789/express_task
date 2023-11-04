@@ -16,6 +16,7 @@ module.exports = {
     // Valid Data
     InvalidUser     : new CustomError("유효하지 않은 유저 정보입니다."    , 400),
     InvalidPw       : new CustomError("비밀번호가 불일치 합니다."        , 400),
+    InvalidJoinInfo : new CustomError("비밀번호는 대소문자, 숫자로 이루어진 4글자 이상이여야 합니다.", 400),
     InvalidLoginInfo: new CustomError("닉네임 또는 패스워드를 확인해주세요.", 400),
     // CRUD
     FailedUpdate    : new CustomError("데이터 수정에 실패 했습니다."      , 400),

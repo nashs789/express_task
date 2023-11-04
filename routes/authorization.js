@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const SECRET_KEY = process.env.SECRET_KEY;
+
 const {InvalidToken} = require("../routes/Class/CustomError.js");
 
 module.exports = {
