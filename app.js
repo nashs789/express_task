@@ -1,19 +1,19 @@
-// express라는 이름을 갖는 express 모듈
 const express = require('express');
-// application 객체 반환
 const app = express();
 const port = 3000;
 const connect = require("./schemas");
 connect();
 
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
+
 const Error = require("./schemas/Error.js");
 
-const goodsRouter = require("./routes/goods");
-const CommentRouter = require("./routes/comment");
-const postRouter = require("./routes/post");
-const userRouter = require("./routes/user");
+const CommentRouter = require("./routes/comment.js");
+const postRouter = require("./routes/post.js");
+const userRouter = require("./routes/user.js");
+const loginRouter = require("./routes/login.js");
 
-// app.set('trust proxy', true);
 app.use(express.json());
 
 app.use((req, res, next) => {
@@ -22,6 +22,7 @@ app.use((req, res, next) => {
     const proxyIps = req.ips;
     const params = req.body;
 
+    console.log();
     console.log("=============== [", req.method, "]", req.url, "===============");
     console.log("date: ", date);
     console.log("client Ip: ", clientIp);
@@ -30,11 +31,12 @@ app.use((req, res, next) => {
         const value = params[key];
         console.log(key, "=", value);
     });
+    console.log();
     
     next();
 });
 
-app.use("/api", [goodsRouter, postRouter, CommentRouter, userRouter]);
+app.use("/api", [postRouter, CommentRouter, userRouter, loginRouter]);
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
@@ -47,15 +49,10 @@ app.use(function(req, res, next) {
 
 // error-handling middleware
 app.use((err, req, res, next) => {
-    // handler에서 찍으면 찍히는데 안찍고 error에서 바로 찍으면 안찍히는데?
     const clientIp = req.ip;
     const proxyIps = req.ips;
 
-    // console.log("==================");
-    // console.log(err.name);
     console.log(err.stack);
-    // console.log(err.message);
-    // console.log("==================");
 
     try {
         Error.create({
