@@ -5,21 +5,32 @@ const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
+
+const User = require("../schemas/user.js");
+
 const {InvalidLoginInfo} = require("../routes/Class/CustomError.js");
 const {Common} = require("../routes/Class/Common.js");
-const User = require("../schemas/user.js");
 
 router.post("/login", async(req, res, next) => {
     const {user, password} = req.body;
-    let loginResult;
-    let token;
+    let loginResult, token, hashedPw;
     
     try {
-        loginResult = await User.findOne({user, password});
+        hashedPw = await bcrypt.hash(password, saltRounds);
+        loginResult = await User.findOne({"user": user});
 
         if(Common.isEmpty(loginResult)){
             throw InvalidLoginInfo;
         }
+
+        await bcrypt.compare(password, loginResult.password)
+                    .then((isMatch) => {
+                        if(!isMatch){
+                            throw InvalidLoginInfo;
+                        }
+                    });
 
         token = jwt.sign({user_id: user},
                          SECRET_KEY,
