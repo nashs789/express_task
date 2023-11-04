@@ -4,8 +4,9 @@ const router = express.Router();
 const Post = require("../schemas/post.js");
 const Counter = require("../schemas/Counter.js")
 const {NoData, NoPost, InvalidUser, NoRequiredData} = require("../routes/Class/CustomError.js");
-const {verify} = require("../routes/authorization.js");
 const {Common} = require("../routes/Class/Common.js");
+
+const {verify} = require("../routes/authorization.js");
 
 router.get("/post", async(req, res, next) => {
     let selectResult;
@@ -28,7 +29,7 @@ router.get("/post", async(req, res, next) => {
 });
 
 router.post("/post", verify, async(req, res, next) => {
-    const {title, contents, user, password} = req.body;
+    const {title, contents, user} = req.body;
     let insertResult;
 
     try {
@@ -42,7 +43,7 @@ router.post("/post", verify, async(req, res, next) => {
         // counter랑 post등록은 transaction 안 묶여있음 => 테스트 결과 밑에서 터지면 위만 반영됨
         // counter는 정수인가? 그럼 overflow는?
         await Counter.updateOne({id: 0}, {$set: {"postIdCounter": post_no}});
-        insertResult = await Post.create({post_no, title, contents, user, password});
+        insertResult = await Post.create({post_no, title, contents, user});
     } catch(err){
         next(err);
         return;
@@ -77,7 +78,7 @@ router.get("/post/:post_no", async(req, res, next) =>{
 
 router.put("/post/:post_no", verify, async(req, res, next) => {
     const {post_no} = req.params;
-    const {user, password, title, contents} = req.body;
+    const {user, title, contents} = req.body;
 
     try{
         const post_info = await Post.findOne({"post_no": Number(post_no)});
@@ -86,7 +87,7 @@ router.put("/post/:post_no", verify, async(req, res, next) => {
             throw NoPost;
         }
 
-        if(post_info.user != user || post_info.password != password){
+        if(post_info.user != user){
             throw InvalidUser;
         }
 
@@ -102,7 +103,7 @@ router.put("/post/:post_no", verify, async(req, res, next) => {
 
 router.delete("/post/:post_no", verify, async(req, res, next) => {
     const {post_no} = req.params;
-    const {user, password} = req.body;
+    const {user} = req.body;
 
     try {
         const post_info = await Post.findOne({"post_no": Number(post_no)});
@@ -111,7 +112,7 @@ router.delete("/post/:post_no", verify, async(req, res, next) => {
             throw NoPost;
         }
 
-        if(post_info.user != user || post_info.password != password){
+        if(post_info.user != user){
             throw InvalidUser;
         }
 

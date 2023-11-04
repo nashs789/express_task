@@ -3,8 +3,10 @@ const router = express.Router();
 
 const Comment = require("../schemas/comment.js");
 const Counter = require("../schemas/Counter.js");
-const {NoData, NoComments, FailedUpdate, FailedDelete} = require("./Class/CustomError.js");
-const { Common } = require("../routes/Class/Common.js");
+const {NoData, NoComments, InvalidUser, FailedUpdate, FailedDelete} = require("./Class/CustomError.js");
+const {Common} = require("../routes/Class/Common.js");
+
+const {verify} = require("../routes/authorization.js");
 
 router.get("/comment", async(req, res, next) => {
     let selectResult;
@@ -26,7 +28,7 @@ router.get("/comment", async(req, res, next) => {
     });
 });
 
-router.post("/comment", async(req, res, next) => {
+router.post("/comment", verify, async(req, res, next) => {
     const {post_no, contents, user} = req.body;
     let insertResult;
 
@@ -55,12 +57,18 @@ router.post("/comment", async(req, res, next) => {
     })
 });
 
-router.put("/comment/:cmt_no", async(req, res, next) => {
+router.put("/comment/:cmt_no", verify, async(req, res, next) => {
     const {cmt_no} = req.params;
-    const {contents} = req.body;
+    const {user, contents} = req.body;
     let updateResult;
     
     try {
+        const cmtInfo = await Comment.findOne({cmt_no});
+
+        if(cmtInfo != user){
+            throw InvalidUser;
+        }
+        
         if(Common.isEmpty(contents)){
             throw NoComments;
         }
@@ -82,12 +90,18 @@ router.put("/comment/:cmt_no", async(req, res, next) => {
 });
 
 // 삭제에는 조건 없음(owner, id, password)
-router.delete("/comment/:cmt_no", async(req, res, next) => {
+router.delete("/comment/:cmt_no", verify, async(req, res, next) => {
     const {cmt_no} = req.params;
-    const {post_no} = req.body;
+    const {user} = req.body;
     let deleteResult;
     
     try{
+        const cmtInfo = await Comment.findOne({cmt_no});
+
+        if(cmtInfo != user){
+            throw InvalidUser;
+        }
+
         deleteResult = await Comment.deleteOne({cmt_no});
 
         if(deleteResult.deletedCount == 0){
