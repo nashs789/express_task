@@ -13,7 +13,7 @@ module.exports = {
     FailedToReg : new CustomError("등록에 실패 하였습니다."     , 400),
     InvalidUser : new CustomError("유효하지 않은 유저 정보입니다.", 400),
     NoComments  : new CustomError("댓글 내용을 입력해주세요."    , 400),
-    NotCheckPw  : new CustomError("비밀번호가 불일치 합니다."    , 400),
+    NotValidPw  : new CustomError("비밀번호가 불일치 합니다."    , 400),
     FailedUpdate: new CustomError("데이터 수정에 실패 했습니다."  , 400),
     FailedInsert: new CustomError("데이터 삽입에 실패 했습니다."  , 400),
     FailedDelete: new CustomError("데이터 삭제에 실패 했습니다."  , 400)

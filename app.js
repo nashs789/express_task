@@ -18,10 +18,14 @@ app.use(express.json());
 
 app.use((req, res, next) => {
     const date = new Date();
+    const clientIp = req.ip;
+    const proxyIps = req.ips;
     const params = req.body;
 
     console.log("=============== [", req.method, "]", req.url, "===============");
-    console.log("date: ", date)
+    console.log("date: ", date);
+    console.log("client Ip: ", clientIp);
+    console.log("proxy Ips: ", proxyIps);
     Object.keys(params).forEach((key) => {
         const value = params[key];
         console.log(key, "=", value);
@@ -38,7 +42,7 @@ app.get('/', (req, res) => {
 
 //  404 responses
 app.use(function(req, res, next) {
-    res.status(404).send('Sorry cant find that!');
+    res.status(404).send("404 Not Found");
 });
 
 // error-handling middleware

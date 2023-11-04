@@ -3,7 +3,7 @@ const router = express.Router();
 
 const User = require("../schemas/user.js");
 const { Common } = require("../routes/Class/Common.js");
-const { NotCheckPw } = require("../routes/Class/CustomError.js");
+const { NotValidPw } = require("../routes/Class/CustomError.js");
 
 router.post("/join", async(req, res, next) => {
     const {nickname, password, password_check} = req.body;
@@ -11,7 +11,7 @@ router.post("/join", async(req, res, next) => {
 
     try {
         if(Common.isEmpty(password) || password !== password_check){
-            throw NotCheckPw;
+            throw NotValidPw;
         }
     
         user = await User.create({nickname, password});
