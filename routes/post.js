@@ -3,10 +3,13 @@ const router = express.Router();
 
 const Post = require("../schemas/post.js");
 const Counter = require("../schemas/Counter.js")
-const { NoData, InvalidUser } = require("../routes/Class/CustomError.js");
+const {NoData, NoPost, InvalidUser, NoRequiredData} = require("../routes/Class/CustomError.js");
+const {verify} = require("../routes/authorization.js");
+const {Common} = require("../routes/Class/Common.js");
 
 router.get("/post", async(req, res, next) => {
     let selectResult;
+
     try {
         selectResult = await Post.find().sort({reg_date: -1});
 
@@ -24,76 +27,102 @@ router.get("/post", async(req, res, next) => {
     });
 });
 
-router.post("/post", async(req, res) => {
+router.post("/post", verify, async(req, res, next) => {
     const {title, contents, user, password} = req.body;
-    const counter = await Counter.find({});
-    let post_no = counter[0].postIdCounter + 1;
+    let insertResult;
 
-    // counter랑 post등록은 transaction 안 묶여있음 => 테스트 결과 밑에서 터지면 위만 반영됨
-    // counter는 정수인가? 그럼 overflow는?
-    await Counter.updateOne({id: 0}, {$set: {"postIdCounter": post_no}});
-    const newPost = await Post.create({post_no, title, contents, user, password});
+    try {
+        if(Common.isEmpty(title) || Common.isEmpty(contents)){
+            throw NoRequiredData;
+        }
 
-    // 등록 실패 예외처리
+        const counter = await Counter.find({});
+        let post_no = counter[0].postIdCounter + 1;
 
-    res.json({newPost});
-});
-
-router.get("/post/:post_no", async(req, res) =>{
-    const {post_no} = req.params;
-    const result = await Post.find({post_no});
-
-    // 이런것도 공통 함수로 빼서 만들면 될듯?
-    // 그리고 밑에처럼 짜면 서버 꺼지는데? try로 해야하나?
-    if(!result.length){
-        res.status(400).json({
-            success: false,
-            error  : NoData.message,
-            code   : NoData.code
-        });
+        // counter랑 post등록은 transaction 안 묶여있음 => 테스트 결과 밑에서 터지면 위만 반영됨
+        // counter는 정수인가? 그럼 overflow는?
+        await Counter.updateOne({id: 0}, {$set: {"postIdCounter": post_no}});
+        insertResult = await Post.create({post_no, title, contents, user, password});
+    } catch(err){
+        next(err);
+        return;
     }
 
-    res.json({post: result});
+    res.json({
+        "success": true,
+        "result" : insertResult
+    });
 });
 
-router.put("/post/:post_no", async(req, res) => {
+router.get("/post/:post_no", async(req, res, next) =>{
+    const {post_no} = req.params;
+    let selectresult;
+    
+    try{
+        selectresult = await Post.find({post_no});
+
+        if(!selectresult.length){
+            throw NoData;
+        }
+    } catch(err){
+        next(err);
+        return;
+    }
+
+    res.json({
+        "success": true,
+        "result" : selectresult
+    });
+});
+
+router.put("/post/:post_no", verify, async(req, res, next) => {
     const {post_no} = req.params;
     const {user, password, title, contents} = req.body;
-    const post_info = await Post.findOne({"post_no": Number(post_no)});
 
-    // 유저 정보에 따른 예외처리도 공통으로 처리하면 좋을듯?
-    if(post_info.user != user || post_info.password != password){
-        res.status(400).json({
-            success: false,
-            error  : InvalidUser.message,
-            code   : InvalidUser.code
-        });
+    try{
+        const post_info = await Post.findOne({"post_no": Number(post_no)});
+        
+        if(Common.isEmpty(post_info)){
+            throw NoPost;
+        }
+
+        if(post_info.user != user || post_info.password != password){
+            throw InvalidUser;
+        }
+
+        await Post.updateOne({post_no}, {$set: {'title': title, 'contents': contents}});
+
+    } catch(err) {
+        next(err);
+        return;
     }
 
-    // 수정 실패 예외처리
-    await Post.updateOne({post_no}, {$set: {'title': title, 'contents': contents}});
-
-    res.json({success: true});
+    res.json({"success": true});
 });
 
-router.delete("/post/:post_no", async(req, res) => {
+router.delete("/post/:post_no", verify, async(req, res, next) => {
     const {post_no} = req.params;
     const {user, password} = req.body;
-    const post_info = await Post.findOne({"post_no": Number(post_no)});
 
-    if(post_info.user != user || post_info.password != password){
-        res.status(400).json({
-            success: false,
-            error  : InvalidUser.message,
-            code   : InvalidUser.code
-        });
+    try {
+        const post_info = await Post.findOne({"post_no": Number(post_no)});
+
+        if(Common.isEmpty(post_info)){
+            throw NoPost;
+        }
+
+        if(post_info.user != user || post_info.password != password){
+            throw InvalidUser;
+        }
+
+        await Post.deleteOne({post_no});
+
+    } catch(err){
+        next(err);
+        return;
     }
 
-    // 삭제 실패 예외처리
-    await Post.deleteOne({post_no});
-
-    // 성공여부 예외처리
-    res.json({success: true});
+    res.json({"success": true});
 });
 
 module.exports = router;

@@ -2,8 +2,8 @@ const express = require('express');
 const router = express.Router();
 
 // =============== Schemas ===============
-const Cart = require("../schemas/carts.js");
-const Goods = require("../schemas/goods.js");
+const Cart = require("../../schemas/Practice/carts.js");
+const Goods = require("../../schemas/goods.js");
 
 const goods = [
     {
