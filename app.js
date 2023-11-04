@@ -56,6 +56,8 @@ app.use((err, req, res, next) => {
 
     try {
         Error.create({
+          "url"     : req.url,
+          "method"  : req.method,
           "clientIp": clientIp,
           "proxyIp" : proxyIps,
           "name"    : err.name,
