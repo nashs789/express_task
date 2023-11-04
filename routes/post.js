@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
+const Comment = require("../schemas/comment.js");
 const Post = require("../schemas/post.js");
 const Counter = require("../schemas/Counter.js")
 const {NoData, NoPost, InvalidUser, NoRequiredData} = require("../routes/Class/CustomError.js");
@@ -117,7 +118,7 @@ router.delete("/post/:post_no", verify, async(req, res, next) => {
         }
 
         await Post.deleteOne({post_no});
-
+        await Comment.deleteMany({post_no});
     } catch(err){
         next(err);
         return;
