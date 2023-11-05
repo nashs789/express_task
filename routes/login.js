@@ -13,6 +13,13 @@ const User = require("../schemas/user.js");
 const {InvalidLoginInfo} = require("../routes/Class/CustomError.js");
 const {Common} = require("../routes/Class/Common.js");
 
+router.get('/logout', (req, res) => {
+    res.clearCookie('jwt');
+    // res.redirect('/login');
+
+    res.json({"sucess": true});
+});
+
 router.post("/login", async(req, res, next) => {
     const {user, password} = req.body;
     let loginResult, token, hashedPw;
@@ -45,7 +52,7 @@ router.post("/login", async(req, res, next) => {
         "sucess": true,
         "result": loginResult,
         "token" : token
-    })
+    });
 });
 
 module.exports = router;
