@@ -1,10 +1,10 @@
 const mongoose = require("mongoose");
 
 const ErrorSchema = new mongoose.Schema({
-    url:{
+    method:{
         type: String
     },
-    method:{
+    url:{
         type: String
     },
     clientIp:{

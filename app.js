@@ -4,15 +4,22 @@ const port = 3000;
 const connect = require("./schemas");
 connect();
 
+const jwt = require('jsonwebtoken');
+require("dotenv").config();
+const SECRET_KEY = process.env.SECRET_KEY;
+
 const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 const Error = require("./schemas/Error.js");
+const Access = require("./schemas/access.js");
 
 const CommentRouter = require("./routes/comment.js");
 const postRouter = require("./routes/post.js");
 const userRouter = require("./routes/user.js");
 const loginRouter = require("./routes/login.js");
+
+const {Common} = require("./routes/Class/Common.js");
 
 app.use(express.json());
 
@@ -20,15 +27,39 @@ app.use((req, res, next) => {
     const date = new Date();
     const clientIp = req.ip;
     const proxyIps = req.ips;
-    const params = req.body;
+    const {password, ...paramsWithoutPassword} = req.body;
+    const method = req.method;
+    const url = req.url;
+
+    try {
+        const user = jwt.verify(req.cookies.jwt, SECRET_KEY).user_id;
+
+        if(!Common.isEmpty(user)){
+            // 나중에 Access에 대해서 필요한 것인가에 대해서 생각은 해봐야할듯?
+            Access.create({
+                "user"    : user,
+                "method"  : method,
+                "params"  : paramsWithoutPassword,
+                "url"     : url,
+                "clientIp": clientIp,
+                "proxyIp" : proxyIps
+            });
+        }
+
+    } catch(err){
+        // 요청에 대한 db 에러는 처리 안하고 그대로 넘어가야할 것 같은데
+        // Client 요청을 insert 하는 과정에서 나는 서버 에러가 Client 요청에 영향을 끼치면 안되지 않나?
+        // next(err);
+        // return;
+    }
 
     console.log();
-    console.log("=============== [", req.method, "]", req.url, "===============");
+    console.log("=============== [", method, "]", url, "===============");
     console.log("date: ", date);
     console.log("client Ip: ", clientIp);
     console.log("proxy Ips: ", proxyIps);
-    Object.keys(params).forEach((key) => {
-        const value = params[key];
+    Object.keys(paramsWithoutPassword).forEach((key) => {
+        const value = paramsWithoutPassword[key];
         console.log(key, "=", value);
     });
     console.log();
