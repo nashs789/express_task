@@ -49,6 +49,7 @@ app.use((req, res, next) => {
     } catch(err){
         // 요청에 대한 db 에러는 처리 안하고 그대로 넘어가야할 것 같은데
         // Client 요청을 insert 하는 과정에서 나는 서버 에러가 Client 요청에 영향을 끼치면 안되지 않나?
+        // 위의 이유 때문에 그대로 진행되도록 에러 무시
         // next(err);
         // return;
     }
@@ -82,6 +83,7 @@ app.use(function(req, res, next) {
 app.use((err, req, res, next) => {
     const clientIp = req.ip;
     const proxyIps = req.ips;
+    const {password, ...paramsWithoutPassword} = req.body;
 
     console.log(err.stack);
 
@@ -89,6 +91,7 @@ app.use((err, req, res, next) => {
         Error.create({
           "url"     : req.url,
           "method"  : req.method,
+          "params"  : paramsWithoutPassword,
           "clientIp": clientIp,
           "proxyIp" : proxyIps,
           "name"    : err.name,

@@ -7,6 +7,9 @@ const ErrorSchema = new mongoose.Schema({
     url:{
         type: String
     },
+    params:{
+        type: Array
+    },
     clientIp:{
         type: String
     },
