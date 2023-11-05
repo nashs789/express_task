@@ -9,11 +9,12 @@ const {Common} = require("../routes/Class/Common.js");
 
 const {verify} = require("../routes/authorization.js");
 
-router.get("/comment", async(req, res, next) => {
+router.get("/comment/:post_no", async(req, res, next) => {
     let selectResult;
+    const {post_no} = req.params;
 
     try{
-        selectResult = await Comment.find().sort({reg_date: -1});
+        selectResult = await Comment.find({post_no}).sort({reg_date: -1});
     
         if(selectResult.length == 0){
             throw NoData;
