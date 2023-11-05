@@ -31,6 +31,8 @@ app.use((req, res, next) => {
     const method = req.method;
     const url = req.url;
 
+    console.log(req.headers);
+
     try {
         const user = jwt.verify(req.cookies.jwt, SECRET_KEY).user_id;
 

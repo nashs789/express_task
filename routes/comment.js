@@ -9,7 +9,8 @@ const {Common} = require("../routes/Class/Common.js");
 
 const {verify} = require("../routes/authorization.js");
 
-router.get("/comment", async(req, res, next) => {
+router.get("/comment/:post_no", async(req, res, next) => {
+    const {post_no} = req.params;
     let selectResult;
 
     try{
