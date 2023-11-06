@@ -26,6 +26,10 @@ const loginRouter = require("./routes/login.js");
 const {Common} = require("./routes/Class/Common.js");
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+const { swaggerUi, specs } = require("./routes/swagger/swagger.js");
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use((req, res, next) => {
     const date = new Date();
@@ -41,6 +45,7 @@ app.use((req, res, next) => {
 
         if(!Common.isEmpty(user)){
             // 나중에 Access에 대해서 필요한 것인가에 대해서 생각은 해봐야할듯?
+            // 쿼리 스트링으로 들어오는 변수는 제외했네
             Access.create({
                 "user"    : user,
                 "method"  : method,
@@ -83,10 +88,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use("/comment", CommentRouter);
-app.use("/log", loginRouter);
 app.use("/user", userRouter);
 app.use("/post", postRouter);
+app.use("/comment", CommentRouter);
+app.use("/log", loginRouter);
 
 // GET 요청 처리
 app.get('/', (req, res) => {
