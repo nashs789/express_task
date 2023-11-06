@@ -15,7 +15,6 @@ module.exports = {
                 throw InvalidToken;
             }
 
-            // locals에 저장은 되어 있지만 아직 쓰임세는 안정해짐
             res.locals.user = decoded.user_id;
             next();
         } catch (err) {

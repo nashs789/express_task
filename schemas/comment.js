@@ -1,20 +1,19 @@
 const mongoose = require("mongoose");
 
 const CommentSchema = new mongoose.Schema({
-    post_no:{
-        type   : Number,
+    post_id:{
+        type   : String,
         require: true,
-    },
-    cmt_no:{
-        type   : Number,
-        require: true,
-        unique : true
     },
     contents:{
         type   : String,
         require: true,
     },
     user: {
+        type   : String,
+        require: true
+    },
+    nickname:{
         type   : String,
         require: true
     },

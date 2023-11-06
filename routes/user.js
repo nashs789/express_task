@@ -9,9 +9,10 @@ const User = require("../schemas/user.js");
 const {Common} = require("../routes/Class/Common.js");
 const {InvalidPw, InvalidJoinInfo} = require("../routes/Class/CustomError.js");
 
+// test { o }
 router.post("/join", async(req, res, next) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{4,}$/;
-    const {user, password, password_check} = req.body;
+    const {user, nickname, password, password_check} = req.body;
     let insertResult;
 
     try {
@@ -24,17 +25,27 @@ router.post("/join", async(req, res, next) => {
         }
 
         const hashedPw = await bcrypt.hash(password, saltRounds);
-        insertResult = await User.create({"user": user, "password": hashedPw});
+        insertResult = await User.create({user: user, nickname: nickname, password: hashedPw});
+
+        res.json(Common.getResultJson(insertResult))
     } catch(err){
         next(err);
         return;
     }
+});
 
-    // 이렇게 success & msg 같은 공통적인건 함수로 반환해줘도 될듯?
-    res.json({
-        "success": true,
-        "result" : insertResult
-    });
+// test { o }
+router.post("/delete", async(req, res, next) => {
+    const {user} = req.body;
+
+    try {
+        await User.updateOne({user}, {$set: {"del_yn": true}});
+
+        res.redirect('/api/logout');
+    } catch(err){
+        next(err);
+        return;
+    }
 });
 
 module.exports = router;
