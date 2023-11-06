@@ -7,6 +7,9 @@ const accessSchema = new mongoose.Schema({
     method:{
         type: String
     },
+    agent: {
+        type: String
+    },
     params:{
         type: Array
     },

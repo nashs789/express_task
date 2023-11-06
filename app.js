@@ -1,8 +1,12 @@
 const express = require('express');
+const morgan = require('morgan');
 const app = express();
 const port = 3000;
 const connect = require("./schemas");
 connect();
+
+//const customLogFormat = ':method :url :status :res[content-length] - :response-time ms';
+app.use(morgan('combined'));
 
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
@@ -30,6 +34,7 @@ app.use((req, res, next) => {
     const {password, ...paramsWithoutPassword} = req.body;
     const method = req.method;
     const url = req.url;
+    const agent = req.headers['user-agent'];
 
     try {
         const user = jwt.verify(req.cookies.jwt, SECRET_KEY).user_id;
@@ -39,6 +44,7 @@ app.use((req, res, next) => {
             Access.create({
                 "user"    : user,
                 "method"  : method,
+                "agent"   : agent,
                 "params"  : paramsWithoutPassword,
                 "url"     : url,
                 "clientIp": clientIp,
@@ -53,11 +59,13 @@ app.use((req, res, next) => {
         // return;
     }
 
-    console.log();
-    console.log("=============== [", method, "]", url, "===============");
-    console.log("date: ", date);
-    console.log("client Ip: ", clientIp);
-    console.log("proxy Ips: ", proxyIps);
+    console.log(`
+    =============== [${method}] ${url} ===============
+    date: ${date}
+    agent: ${agent}
+    client Ip: ${clientIp}
+    proxy Ips: ${proxyIps}
+    `);
     Object.keys(paramsWithoutPassword).forEach((key) => {
         const value = paramsWithoutPassword[key];
         console.log(key, "=", value);
