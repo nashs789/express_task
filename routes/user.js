@@ -9,7 +9,6 @@ const User = require("../schemas/user.js");
 const {Common} = require("../routes/Class/Common.js");
 const {InvalidPw, InvalidJoinInfo} = require("../routes/Class/CustomError.js");
 
-// test { o }
 router.post("/join", async(req, res, next) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{4,}$/;
     const {user, nickname, password, password_check} = req.body;
@@ -30,11 +29,9 @@ router.post("/join", async(req, res, next) => {
         res.json(Common.getResultJson(insertResult))
     } catch(err){
         next(err);
-        return;
     }
 });
 
-// test { o }
 router.post("/delete", async(req, res, next) => {
     const {user} = req.body;
 
@@ -44,7 +41,6 @@ router.post("/delete", async(req, res, next) => {
         res.redirect('/api/logout');
     } catch(err){
         next(err);
-        return;
     }
 });
 
