@@ -18,6 +18,10 @@ const userSchema = new mongoose.Schema({
         type   : Boolean,
         default: false
     },
+    last_date:{
+        type   : Date,
+        default: Date.now
+    },
     reg_date:{
         type   : Date,
         default: Date.now

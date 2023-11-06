@@ -3,12 +3,11 @@ const router = express.Router();
 
 const Comment = require("../schemas/comment.js");
 
-const {NoData, NoComments, NotPermitted, InvalidUser, FailedDelete} = require("./Class/CustomError.js");
+const {NoData, NoComments, NotPermitted} = require("./Class/CustomError.js");
 const {Common} = require("../routes/Class/Common.js");
 
 const {verify} = require("../routes/authorization.js");
 
-// test { o }
 router.get("/:post_id", async(req, res, next) => {
     try{
         const {post_id} = req.params;
@@ -21,11 +20,9 @@ router.get("/:post_id", async(req, res, next) => {
         res.json(Common.getResultJson(selectResult));
     } catch(err){
         next(err);
-        return;
     }
 });
 
-// test { o }
 router.post("/", verify, async(req, res, next) => {
     try{
         const {post_id, contents, user, nickname} = req.body;
@@ -42,11 +39,9 @@ router.post("/", verify, async(req, res, next) => {
         res.json(Common.getResultJson(insertResult));
     } catch(err){
         next(err);
-        return;
     }
 });
 
-// test { o }
 router.put("/:cmt_id", verify, async(req, res, next) => {    
     try {
         const {cmt_id} = req.params;
@@ -64,11 +59,9 @@ router.put("/:cmt_id", verify, async(req, res, next) => {
         res.json(Common.getResultJson(updateResult));
     } catch(err){
         next(err);
-        return;
     }
 });
 
-// test { o }
 router.delete("/:cmt_id", verify, async(req, res, next) => {
     try{
         const {cmt_id} = req.params;
@@ -82,7 +75,6 @@ router.delete("/:cmt_id", verify, async(req, res, next) => {
         res.json(Common.getResultJson(deleteResult));    // delete는 삭제 성공하면 null 반환하네
     } catch(err){
         next(err);
-        return;
     }
 });
 

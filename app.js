@@ -122,7 +122,7 @@ app.use((err, req, res, next) => {
           "stack"   : err.message
         })
     } catch(err){
-        return
+
     }
 
     res.json({"success": false, "msg": err.message})
