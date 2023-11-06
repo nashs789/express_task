@@ -3,7 +3,7 @@
     "username": "root",
     "password": "qwer1234",
     "database": "express_sequelize_init",
-    "host": "express-database.clx5rpjtu59t.ap-northeast-2.rds.amazonaws.com",
+    "host": "express-database.cipeiq8u6kt3.ap-northeast-2.rds.amazonaws.com",
     "dialect": "mysql"
   },
   "test": {

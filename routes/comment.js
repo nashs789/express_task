@@ -14,7 +14,7 @@ router.get("/comment/:post_no", async(req, res, next) => {
     let selectResult;
 
     try{
-        selectResult = await Comment.find().sort({reg_date: -1});
+        selectResult = await Comment.find({post_no}).sort({reg_date: -1});
     
         if(selectResult.length == 0){
             throw NoData;
@@ -74,7 +74,7 @@ router.put("/comment/:cmt_no", verify, async(req, res, next) => {
         if(Common.isEmpty(contents)){
             throw NoComments;
         }
-
+        
         updateResult = await Comment.updateOne({cmt_no}, {$set: {'contents': contents}});
         
         if(!updateResult){
