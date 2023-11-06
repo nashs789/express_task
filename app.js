@@ -1,12 +1,12 @@
 const express = require('express');
-const morgan = require('morgan');
+//const morgan = require('morgan');
 const app = express();
 const port = 3000;
 const connect = require("./schemas");
 connect();
 
 //const customLogFormat = ':method :url :status :res[content-length] - :response-time ms';
-app.use(morgan('combined'));
+//app.use(morgan('combined'));
 
 const jwt = require('jsonwebtoken');
 require("dotenv").config();
@@ -59,26 +59,44 @@ app.use((req, res, next) => {
         // return;
     }
 
+    const keys = Object.keys(paramsWithoutPassword);
+    var params = "";
+
+    if(keys.length !== 0){
+        params = "=============== [ Parameters ] ===============\n";
+
+        keys.forEach((key) => {
+            const value = paramsWithoutPassword[key];
+            params += "\t" + key + " = " +value + "\n";
+        });
+    }
+
     console.log(`
     =============== [${method}] ${url} ===============
-    date: ${date}
-    agent: ${agent}
+    date     : ${date}
+    agent    : ${agent}
     client Ip: ${clientIp}
     proxy Ips: ${proxyIps}
+    ${params}
     `);
-    Object.keys(paramsWithoutPassword).forEach((key) => {
-        const value = paramsWithoutPassword[key];
-        console.log(key, "=", value);
-    });
-    console.log();
     
     next();
 });
 
-app.use("/api", [postRouter, CommentRouter, userRouter, loginRouter]);
+app.use("/comment", CommentRouter);
+app.use("/log", loginRouter);
+app.use("/user", userRouter);
+app.use("/post", postRouter);
 
+// GET 요청 처리
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send('Hello World (GET)!');
+});
+
+// POST 요청 처리
+// redirect는 GET아닌가? 왜 여기로 들어오지???
+app.post('/', (req, res) => {
+    res.send('Hello World (POST)!');
 });
 
 //  404 responses

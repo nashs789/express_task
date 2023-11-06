@@ -7,8 +7,13 @@ class CustomError extends Error{
 }
 
 // server error로 500 떨궈야 하는거 아닌가? code는 사용자 정의 에러코드인가????
+// 막 늘리다 보니까 너무 막 늘어났네
 module.exports = {
     CustomError,
+    NotFound        : new CustomError("해당 게시글이 존재하지 않습니다."  , 404),
+
+    NotPermitted    : new CustomError("허가되지 않은 접근 입니다."      , 404),
+
     NoData          : new CustomError("조회 데이터가 존재하지 않습니다."  , 400),
     NoComments      : new CustomError("댓글 내용을 입력해주세요."        , 400),
     NoRequiredData  : new CustomError("필수 데이터를 입력해주세요."       , 400),

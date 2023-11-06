@@ -13,11 +13,9 @@ const User = require("../schemas/user.js");
 const {InvalidLoginInfo} = require("../routes/Class/CustomError.js");
 const {Common} = require("../routes/Class/Common.js");
 
-router.get('/logout', (req, res) => {
+router.post('/logout', (req, res) => {
     res.clearCookie('jwt');
-    // res.redirect('/login');
-
-    res.json({"sucess": true});
+    res.redirect('/');
 });
 
 router.post("/login", async(req, res, next) => {
@@ -43,16 +41,15 @@ router.post("/login", async(req, res, next) => {
                          SECRET_KEY,
                          {expiresIn: '1h'});
         res.cookie('jwt', token);
+
+        let result = Common.getResultJson(loginResult);
+        result.token = token;
+
+        res.json(result);
     } catch(err){
         next(err);
         return;
     }
-
-    res.json({
-        "sucess": true,
-        "result": loginResult,
-        "token" : token
-    });
 });
 
 module.exports = router;

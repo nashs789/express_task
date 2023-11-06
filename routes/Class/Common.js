@@ -5,6 +5,13 @@ class Common{
         }
         return false;
     }
+
+    getResultJson(obj){
+        return {
+            "success": true,
+            "result" : obj
+        };
+    }
 }
 
 module.exports = { Common: new Common() };

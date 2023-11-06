@@ -3,129 +3,97 @@ const router = express.Router();
 
 const Post = require("../schemas/post.js");
 const Comment = require("../schemas/comment.js");
-const Counter = require("../schemas/Counter.js")
 
-const {NoData, NoPost, InvalidUser, NoRequiredData} = require("../routes/Class/CustomError.js");
+const {NotFound, NoData, NotPermitted, NoRequiredData} = require("../routes/Class/CustomError.js");
 const {Common} = require("../routes/Class/Common.js");
 
 const {verify} = require("../routes/authorization.js");
 
-router.get("/post", async(req, res, next) => {
-    let selectResult;
-
+// test { o }
+router.get("/", async(req, res, next) => {
     try {
-        selectResult = await Post.find().sort({reg_date: -1});
+        const selectResult = await Post.find({del_yn: false, hide_yn: false}).sort({reg_date: -1});
 
         if(selectResult.length == 0){
             throw NoData;
         }
+
+        res.json(Common.getResultJson(selectResult));
     } catch(err){
         next(err);
         return;
     }
-
-    res.json({
-        "success": true, 
-        "result" : selectResult
-    });
 });
 
-router.post("/post", verify, async(req, res, next) => {
-    const {title, contents, user} = req.body;
-    let insertResult;
+// test { o }
+router.get("/:post_id", async(req, res, next) =>{
+    try{
+        const {post_id} = req.params;
+        const selectresult = await Post.findOne({_id: post_id});
 
+        if(!selectresult){
+            throw NotFound;
+        }
+
+        res.json(Common.getResultJson(selectresult));
+    } catch(err){
+        next(err);
+        return;
+    }
+});
+
+// test { o }
+router.post("/", verify, async(req, res, next) => {
     try {
+        const {title, contents, user} = req.body;
+
         if(Common.isEmpty(title) || Common.isEmpty(contents)){
             throw NoRequiredData;
         }
 
-        const counter = await Counter.find({});
-        let post_no = counter[0].postIdCounter + 1;
-
-        // counter랑 post등록은 transaction 안 묶여있음 => 테스트 결과 밑에서 터지면 위만 반영됨
-        // counter는 정수인가? 그럼 overflow는?
-        await Counter.updateOne({id: 0}, {$set: {"postIdCounter": post_no}});
-        insertResult = await Post.create({post_no, title, contents, user});
+        const insertResult = await Post.create({title, contents, user});
+        res.json(Common.getResultJson(insertResult));
     } catch(err){
         next(err);
         return;
     }
-
-    res.json({
-        "success": true,
-        "result" : insertResult
-    });
 });
 
-router.get("/post/:post_no", async(req, res, next) =>{
-    const {post_no} = req.params;
-    let selectresult;
-    
+// test { o }
+router.put("/:post_id", verify, async(req, res, next) => {
     try{
-        selectresult = await Post.find({post_no});
+        const {post_id} = req.params;
+        const {user, title, contents} = req.body;
 
-        if(!selectresult.length){
-            throw NoData;
-        }
-    } catch(err){
-        next(err);
-        return;
-    }
-
-    res.json({
-        "success": true,
-        "result" : selectresult
-    });
-});
-
-router.put("/post/:post_no", verify, async(req, res, next) => {
-    const {post_no} = req.params;
-    const {user, title, contents} = req.body;
-
-    try{
-        const post_info = await Post.findOne({"post_no": Number(post_no)});
-        
-        if(Common.isEmpty(post_info)){
-            throw NoPost;
+        if(user != res.locals.user){
+            throw NotPermitted;
         }
 
-        if(post_info.user != user){
-            throw InvalidUser;
-        }
-
-        await Post.updateOne({post_no}, {$set: {'title': title, 'contents': contents}});
-
+        const updateResult = await Post.findOneAndUpdate({_id: post_id}, {$set: {title: title, contents: contents, upt_yn: true}});
+        res.json(Common.getResultJson(updateResult));
     } catch(err) {
         next(err);
         return;
     }
-
-    res.json({"success": true});
 });
 
-router.delete("/post/:post_no", verify, async(req, res, next) => {
-    const {post_no} = req.params;
-    const {user} = req.body;
-
+// test { o } 댓글 삭제도 해야함
+router.delete("/:post_id", verify, async(req, res, next) => {
     try {
-        const post_info = await Post.findOne({"post_no": Number(post_no)});
+        const {post_id} = req.params;
+        const {user} = req.body;
 
-        if(Common.isEmpty(post_info)){
-            throw NoPost;
+        if(user != res.locals.user){
+            throw NotPermitted;
         }
 
-        if(post_info.user != user){
-            throw InvalidUser;
-        }
-
-        await Post.deleteOne({post_no});
-        await Comment.deleteMany({post_no});
+        const post_info = await Post.findOneAndDelete({_id: post_id});
+        await Comment.deleteMany({_id: post_id});
+        res.json(Common.getResultJson(post_info));
     } catch(err){
         next(err);
         return;
     }
-
-    res.json({"success": true});
 });
 
 module.exports = router;
