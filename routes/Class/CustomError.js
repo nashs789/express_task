@@ -10,7 +10,7 @@ module.exports = {
     CustomError,
     NotFound        : new CustomError("해당 게시글이 존재하지 않습니다."  , 404),
 
-    NotPermitted    : new CustomError("허가되지 않은 접근 입니다."      , 404),
+    NotPermitted    : new CustomError("허가되지 않은 접근 입니다."      , 400),
 
     NoData          : new CustomError("조회 데이터가 존재하지 않습니다."  , 400),
     NoComments      : new CustomError("댓글 내용을 입력해주세요."        , 400),

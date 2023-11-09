@@ -29,6 +29,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 const { swaggerUi, specs } = require("./routes/swagger/swagger.js");
 
+const {final} = require("./routes/Class/Final.js");
+
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 app.use((req, res, next) => {
@@ -72,7 +74,7 @@ app.use((req, res, next) => {
 
         keys.forEach((key) => {
             const value = paramsWithoutPassword[key];
-            params += "\t" + key + " = " +value + "\n";
+            params += `\t${key} = ${value}\n`;
         });
     }
 
@@ -136,5 +138,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(port, () => {
-    console.log(port, '포트로 서버가 열렸어요!');
+    console.log(`서버가 port number: ${port} 에서 실행 중입니다.`);
 });
